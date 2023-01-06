@@ -1,5 +1,4 @@
-﻿//#include "stdafx. h"
-#include <iostream>
+﻿#include <iostream>
 #include <errno.h>
 
 using namespace std;
@@ -12,6 +11,7 @@ struct sym
 	sym* left;
 	sym* right;
 };
+
 void Statistics(char* String);
 sym* makeTree(sym* psym[], int k);
 void makeCodes(sym* root);
@@ -23,7 +23,7 @@ int kk = 0;					//счетчик количества всех знаков в �
 int kolvo[256] = { 0 };		//инициализируем массив количества уникальных символов
 sym simbols[256] = { 0 };	//инициализируем массив записей
 sym* psym[256];				//инициализируем массив указателей на записи
-float summir = 0;			//сумма частот встречаемости
+float summ_of_all_freq = 0;	//сумма частот встречаемости
 float Size_Encode = 0;		//сумма в битах сжатой строки
 float сompression_ratio = 0;//коэффицент сжатия строки
 
@@ -33,54 +33,34 @@ int main()
 	char* BinaryCode = new char[1000];
 	char* ReducedString = new char[1000];
 	String[0] = BinaryCode[0] = ReducedString[0] = 0;
-	//cout << "enter line : ";
-	//cin >> String;
 	//schitivanie iz file
 	FILE* stream;
-	errno_t Input = fopen_s(&stream, "Input.txt", "r");//("A.txt", "r");
+	errno_t Input = fopen_s(&stream, "Input.txt", "r");
 	char x;
 	int i = 0;
-	while ((feof(stream)==0))//(A) == 0))
+	while ((feof(stream)==0))
 	{
-		fscanf_s(stream, "%c", &x);//(A, "%c", &x);
+		fscanf_s(stream, "%c", &x);
 		String[i] = x;
 		i++;
 	}
 	String[i - 1] = '\0';
-	fclose(stream);//(A);
-
-	sym* symbols = new sym[k];		//создание динамического массива структур simbols
-	sym** psum = new sym * [k];		//создание динамического массива указателей на simbols
-	Statistics(String);				//вызов функции определения частоты символов в строке
-	sym* root = makeTree(psym, k);	//вызов функции создания дерева Хаффмана
-	makeCodes(root);				//вызов функции получения кода
-	CodeHuffman(String, BinaryCode, root);
-	/*
-	cout << "code : " << endl;
-	cout << BinaryCode << endl;
-	*/
-	//FILE* B = fopen_s("B.txt", "w");
-	//fprintf(B, "%s ", BinaryCode);
-	//fclose(B);
-	cout << "Razmer ishodnogo file = " << kk * 8<<" bit\n";
-	cout << "Razmer Encode file = " << Size_Encode << " bit\n";
-	сompression_ratio = (Size_Encode / (kk * 8)) * 100;
-	cout << "Compression_ratio = " << сompression_ratio << "%\n";
-
-	/*
-	errno_t B = fopen_s(&stream, "B.txt", "w");
-	fprintf(stream, "%s ", BinaryCode);
 	fclose(stream);
-	*/
+
+	sym* symbols = new sym[k];				//создание динамического массива структур simbols
+	sym** psum = new sym * [k];				//создание динамического массива указателей на simbols
+	Statistics(String);						//вызов функции определения частоты символов в строке
+	sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
+	makeCodes(root);						//вызов функции получения кода
+	CodeHuffman(String, BinaryCode, root);	//кодирование исходной строки по дереву
+
+	cout << "Razmer ishodnogo file :\t" << kk * 8<<" bit\n";
+	cout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
+	сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
+	cout << "Compression_ratio : \t" << сompression_ratio << "%\n";
+
 	DecodeHuffman(BinaryCode, ReducedString, root);
-	/*
-	cout << "decode : " << endl;
-	cout << ReducedString << endl;
-	*/
-	/*
-	FILE* C = fopen_s("C.txt", "w");
-	fprintf(C, "%s ", ReducedString);
-	fclose(C);*/
+
 	errno_t Output = fopen_s(&stream, "Output.txt", "w");
 	fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
 	fprintf(stream, "Decoding string:\n%s\n", ReducedString);
@@ -233,10 +213,10 @@ void Statistics(char* String)
 	//по итогу сумма частот должна дать 1
 	for (int i = 0; i < k; i++)
 	{
-		summir += simbols[i].freq;
-		printf("Ch= %d\tFreq= %f\tPPP= %c\t\n", simbols[i].ch, simbols[i].freq, psym[i]->ch);
+		summ_of_all_freq += simbols[i].freq;
+		printf("Character = %d\tFrequancy = %f\tSymbol = %c\t\n", simbols[i].ch, simbols[i].freq, psym[i]->ch);
 	}
-	printf("\nKolovo simvolov = %d\tSummir=%f\n", kk, summir);
+	printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", kk, summ_of_all_freq);
 }
 //функция кодирования строки
 void CodeHuffman(char* String, char* BinaryCode, sym* root)
