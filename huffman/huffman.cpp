@@ -80,6 +80,7 @@ int main()
 		temp += (BinaryCode[count++] - 48) * 100;
 		temp += (BinaryCode[count++] - 48) * 10;
 		temp += (BinaryCode[count++] - 48);
+		fprintf(stream, "%c", temp);
 	}
 
 	fclose(stream);
