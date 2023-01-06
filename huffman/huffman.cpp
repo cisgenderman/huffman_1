@@ -24,6 +24,7 @@ int kolvo[256] = { 0 };		//инициализируем массив колич�
 sym simbols[256] = { 0 };	//инициализируем массив записей
 sym* psym[256];				//инициализируем массив указателей на записи
 float summir = 0;			//сумма частот встречаемости
+int Size_Encode = 0;
 
 int main()
 {
@@ -46,14 +47,11 @@ int main()
 	}
 	String[i - 1] = '\0';
 	fclose(stream);//(A);
-	sym* symbols = new sym[k];
-	//создание динамического массива структур simbols
-	sym** psum = new sym * [k];
-	//создание динамического массива указателей на simbols
-	Statistics(String);
-	sym* root = makeTree(psym, k);
-	//вызов функции создания дерева Хаффмана
-	makeCodes(root);//вызов функции получения кода
+	sym* symbols = new sym[k];		//создание динамического массива структур simbols
+	sym** psum = new sym * [k];		//создание динамического массива указателей на simbols
+	Statistics(String);				//вызов функции определения частоты символов в строке
+	sym* root = makeTree(psym, k);	//вызов функции создания дерева Хаффмана
+	makeCodes(root);				//вызов функции получения кода
 	CodeHuffman(String, BinaryCode, root);
 	/*
 	cout << "code : " << endl;
@@ -62,6 +60,9 @@ int main()
 	//FILE* B = fopen_s("B.txt", "w");
 	//fprintf(B, "%s ", BinaryCode);
 	//fclose(B);
+	cout << "Razmer ishodnogo file = " << kk * 8<<" bit\n";
+	cout << "Razmer Encode file = " << Size_Encode << " bit\n";
+
 	errno_t B = fopen_s(&stream, "B.txt", "w");
 	fprintf(stream, "%s ", BinaryCode);
 	fclose(stream);
@@ -85,10 +86,8 @@ int main()
 }
 
 //рeкурсивная функция создания дерева Хаффмана
-
 sym* makeTree(sym* psym[], int k)
 {
-	int i, j;
 	sym* temp;
 	temp = new sym;
 	temp->freq = psym[k - 1]->freq + psym[k - 2]->freq;
@@ -96,24 +95,29 @@ sym* makeTree(sym* psym[], int k)
 	temp->left = psym[k - 1];
 	temp->right = psym[k - 2];
 	if (k == 2)
+	{
 		return temp;
+	}
 	else
 	{
 		//внесение в нужное место массива элемента дерева Хаффмана
-		for (i = 0; i < k; i++)
+		for (int i = 0; i < k; i++)
+		{
 			if (temp->freq > psym[i]->freq)
 			{
-				for (j = k - 1; j > i; j--)
+				for (int j = k - 1; j > i; j--)
+				{
 					psym[j] = psym[j - 1];
+				}	
 				psym[i] = temp;
 				break;
 			}
+		}	
 	}
 	return makeTree(psym, k - 1);
 }
 
 //рекурсивная функция кодирования дерева
-
 void makeCodes(sym* root)
 {
 	if (root->left)
@@ -205,13 +209,17 @@ void Statistics(char* String)
 	//сортировка по убыванию
 	sym tempp;
 	for (int i = 1; i < k; i++)
+	{
 		for (int j = 0; j < k - 1; j++)
+		{
 			if (simbols[j].freq < simbols[j + 1].freq)
 			{
 				tempp = simbols[j];
 				simbols[j] = simbols[j + 1];
 				simbols[j + 1] = tempp;
 			}
+		}
+	}	
 	//печатаем статистику 
 	//по итогу сумма частот должна дать 1
 	for (int i = 0; i < k; i++)
@@ -219,7 +227,7 @@ void Statistics(char* String)
 		summir += simbols[i].freq;
 		printf("Ch= %d\tFreq= %f\tPPP= %c\t\n", simbols[i].ch, simbols[i].freq, psym[i]->ch);
 	}
-	printf("\n Kolovo simvolov = %d\tSummir=%f\n", kk, summir);
+	printf("\nKolovo simvolov = %d\tSummir=%f\n", kk, summir);
 }
 //функция кодирования строки
 void CodeHuffman(char* String, char* BinaryCode, sym* root)
@@ -234,6 +242,7 @@ void CodeHuffman(char* String, char* BinaryCode, sym* root)
 				*temp = *BinaryCode;
 				//strcat_s(BinaryCode, simbols[j].code);
 				strcat_s(BinaryCode, _countof(temp), simbols[j].code);
+				Size_Encode = Size_Encode + (strlen(simbols[j].code) * kolvo[j]);
 			}
 	}
 }
