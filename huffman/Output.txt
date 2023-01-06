@@ -1,0 +1,5 @@
+Binary Code:
+0011110110100010110101101000111110011000
+Decoding string:
+beep boop beer!
+Compression ratio file = 76.666664%

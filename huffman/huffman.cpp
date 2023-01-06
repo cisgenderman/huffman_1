@@ -24,7 +24,8 @@ int kolvo[256] = { 0 };		//инициализируем массив колич�
 sym simbols[256] = { 0 };	//инициализируем массив записей
 sym* psym[256];				//инициализируем массив указателей на записи
 float summir = 0;			//сумма частот встречаемости
-int Size_Encode = 0;
+float Size_Encode = 0;		//сумма в битах сжатой строки
+float сompression_ratio = 0;//коэффицент сжатия строки
 
 int main()
 {
@@ -36,7 +37,7 @@ int main()
 	//cin >> String;
 	//schitivanie iz file
 	FILE* stream;
-	errno_t A = fopen_s(&stream, "A.txt", "r");//("A.txt", "r");
+	errno_t Input = fopen_s(&stream, "Input.txt", "r");//("A.txt", "r");
 	char x;
 	int i = 0;
 	while ((feof(stream)==0))//(A) == 0))
@@ -47,6 +48,7 @@ int main()
 	}
 	String[i - 1] = '\0';
 	fclose(stream);//(A);
+
 	sym* symbols = new sym[k];		//создание динамического массива структур simbols
 	sym** psum = new sym * [k];		//создание динамического массива указателей на simbols
 	Statistics(String);				//вызов функции определения частоты символов в строке
@@ -62,10 +64,14 @@ int main()
 	//fclose(B);
 	cout << "Razmer ishodnogo file = " << kk * 8<<" bit\n";
 	cout << "Razmer Encode file = " << Size_Encode << " bit\n";
+	сompression_ratio = (Size_Encode / (kk * 8)) * 100;
+	cout << "Compression_ratio = " << сompression_ratio << "%\n";
 
+	/*
 	errno_t B = fopen_s(&stream, "B.txt", "w");
 	fprintf(stream, "%s ", BinaryCode);
 	fclose(stream);
+	*/
 	DecodeHuffman(BinaryCode, ReducedString, root);
 	/*
 	cout << "decode : " << endl;
@@ -75,8 +81,10 @@ int main()
 	FILE* C = fopen_s("C.txt", "w");
 	fprintf(C, "%s ", ReducedString);
 	fclose(C);*/
-	errno_t C = fopen_s(&stream, "C.txt", "w");
-	fprintf(stream, "%s ", ReducedString);
+	errno_t Output = fopen_s(&stream, "Output.txt", "w");
+	fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
+	fprintf(stream, "Decoding string:\n%s\n", ReducedString);
+	fprintf(stream, "Compression ratio file = %f%%", сompression_ratio);
 	fclose(stream);
 	delete[] psum;
 	delete[] String;
@@ -118,6 +126,7 @@ sym* makeTree(sym* psym[], int k)
 }
 
 //рекурсивная функция кодирования дерева
+//влево от узла устанавливаем 0, вправо 1
 void makeCodes(sym* root)
 {
 	if (root->left)
@@ -241,7 +250,9 @@ void CodeHuffman(char* String, char* BinaryCode, sym* root)
 				char temp[1000];
 				*temp = *BinaryCode;
 				//strcat_s(BinaryCode, simbols[j].code);
+				//записываем коды символов из дерева
 				strcat_s(BinaryCode, _countof(temp), simbols[j].code);
+				//считаем размер закодированной строки
 				Size_Encode = Size_Encode + (strlen(simbols[j].code) * kolvo[j]);
 			}
 	}
