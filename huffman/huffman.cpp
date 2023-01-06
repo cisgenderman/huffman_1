@@ -66,13 +66,11 @@ int main()
 
 		errno_t Output = fopen_s(&stream, "Output.txt", "w");
 		fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
-		fprintf(stream, "Decoding string:\n%s\n", ReducedString);
-		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 
 		//char temp = 1001;
 		//fprintf(stream, "TEST Govna = %c", temp);
 		int count = 0;
-		fprintf(stream, "TEST Govna = ");
+		fprintf(stream, "Encoding Code = ");
 		while (count < strlen(BinaryCode))
 		{
 			int temp = (BinaryCode[count++] - 48) * 10000000;
@@ -85,6 +83,9 @@ int main()
 			temp += (BinaryCode[count++] - 48);
 			fprintf(stream, "%c", temp);
 		}
+
+		fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
+		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 	}
 	else
 	{
@@ -94,11 +95,8 @@ int main()
 		{
 			fprintf(stream, "%d", 1);
 		}
-		fprintf(stream, "\nDecoding string:\n%s\n", String);
-		сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
-		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 
-		fprintf(stream, "TEST Govna = ");
+		fprintf(stream, "Encoding Code = ");
 		int count = kk / 8;
 		while (count > 0)
 		{
@@ -114,6 +112,10 @@ int main()
 			count--;
 		}
 		fprintf(stream, "%c", temp);
+
+		fprintf(stream, "\nDecoding string:\n%s\n", String);
+		сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
+		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 	}
 	fclose(stream);
 	delete[] psum;
