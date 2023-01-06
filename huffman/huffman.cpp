@@ -64,7 +64,7 @@ int main()
 	//FILE* B = fopen_s("B.txt", "w");
 	//fprintf(B, "%s ", BinaryCode);
 	//fclose(B);
-	errno_t B=fopen_s(&stream, "B.txt", "w");
+	errno_t B = fopen_s(&stream, "B.txt", "w");
 	fprintf(stream, "%s ", BinaryCode);
 	fclose(stream);
 	DecodeHuffman(BinaryCode, ReducedString, root);
