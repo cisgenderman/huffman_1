@@ -64,7 +64,24 @@ int main()
 	errno_t Output = fopen_s(&stream, "Output.txt", "w");
 	fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
 	fprintf(stream, "Decoding string:\n%s\n", ReducedString);
-	fprintf(stream, "Compression ratio file = %f%%", сompression_ratio);
+	fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
+
+	//char temp = 1001;
+	//fprintf(stream, "TEST Govna = %c", temp);
+	int count = 0;
+	fprintf(stream, "TEST Govna = ");
+	while (count < strlen(BinaryCode))
+	{
+		int temp = (BinaryCode[count++] - 48) * 10000000;
+		temp += (BinaryCode[count++] - 48) * 1000000;
+		temp += (BinaryCode[count++] - 48) * 100000;
+		temp += (BinaryCode[count++] - 48) * 10000;
+		temp += (BinaryCode[count++] - 48) * 1000;
+		temp += (BinaryCode[count++] - 48) * 100;
+		temp += (BinaryCode[count++] - 48) * 10;
+		temp += (BinaryCode[count++] - 48);
+	}
+
 	fclose(stream);
 	delete[] psum;
 	delete[] String;
