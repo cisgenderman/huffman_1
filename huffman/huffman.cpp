@@ -97,6 +97,23 @@ int main()
 		fprintf(stream, "\nDecoding string:\n%s\n", String);
 		сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
 		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
+
+		fprintf(stream, "TEST Govna = ");
+		int count = kk / 8;
+		while (count > 0)
+		{
+			int temp = 11111111;
+			count--;
+			fprintf(stream, "%c", temp);
+		}
+		count = kk % 8;
+		int temp = 1;
+		while (count > 1)
+		{
+			temp = temp * 10 + 1;
+			count--;
+		}
+		fprintf(stream, "%c", temp);
 	}
 	fclose(stream);
 	delete[] psum;

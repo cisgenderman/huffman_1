@@ -3,3 +3,4 @@ Binary Code:
 Decoding string:
 aaaaaaaaaaaaaaa
 Compression ratio file = 87.500000%
+TEST Govna = ÇG
