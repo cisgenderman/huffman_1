@@ -133,6 +133,37 @@ void makeCodes(sym* root)
 }
 
 /*функция подсчета количества каждого символа и его вероятности*/
+/*
+//вычисение частоты символов в строке
+void String::symbol_frequency()
+{
+    char* temp_1 = new char[len];   //содержит символы
+    int* temp_2 = new int[len] {0}; //содержит частоту символа
+    //ищем элемент строки в массиве темп1 увеличивавем значение темп2 с индексом вхождения
+    //если не нашли добавляем элемент в темп1 и увеличиваем темп2
+    for (int i = 0; i < len; i++)
+    {
+        bool flag = false;
+        for (int j = 0; j < len; j++)
+        {
+            if (str[i] == temp_1[j])
+            {
+                temp_2[j]++;
+                flag = true;
+                break;
+            }
+        }
+        if (flag == false)
+        {
+            int k = 0;
+            while (temp_2[k] != 0)
+                k++;
+            temp_1[k] = str[i];
+            temp_2[k]++;
+        }
+    }
+}
+*/
 void Statistics(char* String)
 {
 	int i, j;
