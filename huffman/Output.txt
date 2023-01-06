@@ -1,6 +1,5 @@
 Binary Code:
-0011110110100010110101101000111110011000
+111111111111111
 Decoding string:
-beep boop beer!
-Compression ratio file = 23.333334%
-TEST Govna = 
+aaaaaaaaaaaaaaa
+Compression ratio file = 87.500000%

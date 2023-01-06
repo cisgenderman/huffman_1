@@ -50,39 +50,54 @@ int main()
 	sym* symbols = new sym[k];				//создание динамического массива структур simbols
 	sym** psum = new sym * [k];				//создание динамического массива указателей на simbols
 	Statistics(String);						//вызов функции определения частоты символов в строке
-	sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
-	makeCodes(root);						//вызов функции получения кода
-	CodeHuffman(String, BinaryCode, root);	//кодирование исходной строки по дереву
-
-	cout << "Razmer ishodnogo file :\t" << kk * 8<<" bit\n";
-	cout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
-	сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
-	cout << "Compression_ratio : \t" << сompression_ratio << "%\n";
-
-	DecodeHuffman(BinaryCode, ReducedString, root);
-
-	errno_t Output = fopen_s(&stream, "Output.txt", "w");
-	fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
-	fprintf(stream, "Decoding string:\n%s\n", ReducedString);
-	fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
-
-	//char temp = 1001;
-	//fprintf(stream, "TEST Govna = %c", temp);
-	int count = 0;
-	fprintf(stream, "TEST Govna = ");
-	while (count < strlen(BinaryCode))
+	//если количество уникальных символов больше 2
+	if (k >= 2)
 	{
-		int temp = (BinaryCode[count++] - 48) * 10000000;
-		temp += (BinaryCode[count++] - 48) * 1000000;
-		temp += (BinaryCode[count++] - 48) * 100000;
-		temp += (BinaryCode[count++] - 48) * 10000;
-		temp += (BinaryCode[count++] - 48) * 1000;
-		temp += (BinaryCode[count++] - 48) * 100;
-		temp += (BinaryCode[count++] - 48) * 10;
-		temp += (BinaryCode[count++] - 48);
-		fprintf(stream, "%c", temp);
-	}
+		sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
+		makeCodes(root);						//вызов функции получения кода
+		CodeHuffman(String, BinaryCode, root);	//кодирование исходной строки по дереву
 
+		cout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
+		cout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
+		сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
+		cout << "Compression_ratio : \t" << сompression_ratio << "%\n";
+
+		DecodeHuffman(BinaryCode, ReducedString, root);
+
+		errno_t Output = fopen_s(&stream, "Output.txt", "w");
+		fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
+		fprintf(stream, "Decoding string:\n%s\n", ReducedString);
+		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
+
+		//char temp = 1001;
+		//fprintf(stream, "TEST Govna = %c", temp);
+		int count = 0;
+		fprintf(stream, "TEST Govna = ");
+		while (count < strlen(BinaryCode))
+		{
+			int temp = (BinaryCode[count++] - 48) * 10000000;
+			temp += (BinaryCode[count++] - 48) * 1000000;
+			temp += (BinaryCode[count++] - 48) * 100000;
+			temp += (BinaryCode[count++] - 48) * 10000;
+			temp += (BinaryCode[count++] - 48) * 1000;
+			temp += (BinaryCode[count++] - 48) * 100;
+			temp += (BinaryCode[count++] - 48) * 10;
+			temp += (BinaryCode[count++] - 48);
+			fprintf(stream, "%c", temp);
+		}
+	}
+	else
+	{
+		errno_t Output = fopen_s(&stream, "Output.txt", "w");
+		fprintf(stream, "Binary Code:\n");
+		for (int i = 0; i < kk; i++)
+		{
+			fprintf(stream, "%d", 1);
+		}
+		fprintf(stream, "\nDecoding string:\n%s\n", String);
+		сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
+		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
+	}
 	fclose(stream);
 	delete[] psum;
 	delete[] String;
@@ -254,7 +269,7 @@ void CodeHuffman(char* String, char* BinaryCode, sym* root)
 				//записываем коды символов из дерева
 				strcat_s(BinaryCode, _countof(temp), simbols[j].code);
 				//считаем размер закодированной строки
-				Size_Encode = Size_Encode + (strlen(simbols[j].code) * kolvo[j]);
+				Size_Encode = Size_Encode + (strlen(simbols[j].code)); //* kolvo[j]);
 			}
 	}
 }
