@@ -87,6 +87,7 @@ int main()
 		fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
 		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 	}
+	//если строка из одного уникального символа
 	else
 	{
 		errno_t Output = fopen_s(&stream, "Output.txt", "w");
