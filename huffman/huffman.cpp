@@ -5,7 +5,8 @@ using namespace std;
 
 struct sym
 {
-	unsigned char ch;
+	//unsigned char ch;
+	char ch;
 	float freq;
 	char code[255];
 	sym* left;
@@ -20,18 +21,18 @@ void DecodeHuffman(char* BinaryCode, char* ReducedString, sym* root);
 int chh;					//переменная для подсчета информация из строки
 int k = 0;					//счётчик количества различных букв, уникальных символов
 int kk = 0;					//счетчик количества всех знаков в файле
-int kolvo[256] = { 0 };		//инициализируем массив количества уникальных символов
-sym simbols[256] = { 0 };	//инициализируем массив записей
-sym* psym[256];				//инициализируем массив указателей на записи
+int kolvo[15000] = { 0 };		//инициализируем массив количества уникальных символов
+sym simbols[15000] = { 0 };	//инициализируем массив записей
+sym* psym[15000];				//инициализируем массив указателей на записи
 float summ_of_all_freq = 0;	//сумма частот встречаемости
 float Size_Encode = 0;		//сумма в битах сжатой строки
 float сompression_ratio = 0;//коэффицент сжатия строки
 
 int main()
 {
-	char* String = new char[1000];
-	char* BinaryCode = new char[1000];
-	char* ReducedString = new char[1000];
+	char* String = new char[1000000];
+	char* BinaryCode = new char[1000000];
+	char* ReducedString = new char[1000000];
 	String[0] = BinaryCode[0] = ReducedString[0] = 0;
 	//schitivanie iz file
 	FILE* stream;
@@ -218,7 +219,7 @@ void Statistics(char* String)
 	{
 		//цикл для подсчета информация из строки
 		chh = String[i];
-		for (int j = 0; j < 256; j++)
+		for (int j = 0; j < 15000; j++)
 		{
 			//если символ нашли в массиве записей символов, то в массиве количества уникальных символов увеличиваем количество
 			//и увеличиваем общее количество символов
@@ -233,7 +234,7 @@ void Statistics(char* String)
 			//и увеличиваем общее количество символов и уникальных символов
 			if (simbols[j].ch == 0)
 			{
-				simbols[j].ch = (unsigned char)chh;
+				simbols[j].ch = chh;//(unsigned char)chh;
 				kolvo[j] = 1;
 				k++; 
 				kk++;
@@ -283,7 +284,7 @@ void CodeHuffman(char* String, char* BinaryCode, sym* root)
 		for (int j = 0; j < k; j++)
 			if (chh == simbols[j].ch)
 			{
-				char temp[1000];
+				char temp[1000000];
 				*temp = *BinaryCode;
 				//strcat_s(BinaryCode, simbols[j].code);
 				//записываем коды символов из дерева
