@@ -1,41 +1,61 @@
 ﻿#include <iostream>
 #include <errno.h>
+#include <locale>
+#include <fstream>
+
+#include <sstream>
+#include <codecvt>
+#include <io.h>
+#include <fcntl.h>
 
 using namespace std;
 
 struct sym
 {
 	//unsigned char ch;
-	char ch;
+	//char ch;
+	wchar_t ch;
 	float freq;
 	char code[255];
 	sym* left;
 	sym* right;
 };
 
-void Statistics(char* String);
+//void Statistics(char* String);
+void Statistics(wstring String);
 sym* makeTree(sym* psym[], int k);
 void makeCodes(sym* root);
-void CodeHuffman(char* String, char* BinaryCode, sym* root);
-void DecodeHuffman(char* BinaryCode, char* ReducedString, sym* root);
+void CodeHuffman(wstring String, char* BinaryCode, sym* root);
+void DecodeHuffman(char* BinaryCode, wchar_t* ReducedString, sym* root);
 int chh;					//переменная для подсчета информация из строки
 int k = 0;					//счётчик количества различных букв, уникальных символов
 int kk = 0;					//счетчик количества всех знаков в файле
-int kolvo[15000] = { 0 };		//инициализируем массив количества уникальных символов
-sym simbols[15000] = { 0 };	//инициализируем массив записей
-sym* psym[15000];				//инициализируем массив указателей на записи
+int kolvo[256] = { 0 };		//инициализируем массив количества уникальных символов
+sym simbols[256] = { 0 };	//инициализируем массив записей
+sym* psym[256];				//инициализируем массив указателей на записи
 float summ_of_all_freq = 0;	//сумма частот встречаемости
 float Size_Encode = 0;		//сумма в битах сжатой строки
 float сompression_ratio = 0;//коэффицент сжатия строки
+
+std::wstring readFile(const char* filename)
+{
+	std::wifstream wif(filename);
+	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+	std::wstringstream wss;
+	wss << wif.rdbuf();
+	return wss.str();
+}
 
 int main()
 {
 	char* String = new char[1000000];
 	char* BinaryCode = new char[1000000];
-	char* ReducedString = new char[1000000];
+	//char* ReducedString = new char[1000000];
+	wchar_t* ReducedString = new wchar_t[1000000];
 	String[0] = BinaryCode[0] = ReducedString[0] = 0;
 	//schitivanie iz file
 	FILE* stream;
+	/*
 	errno_t Input = fopen_s(&stream, "Input.txt", "r");
 	char x;
 	int i = 0;
@@ -47,31 +67,33 @@ int main()
 	}
 	String[i - 1] = '\0';
 	fclose(stream);
+	*/
+	auto str = readFile("Input.txt");
+	_setmode(_fileno(stdout), _O_U16TEXT);
+
 
 	sym* symbols = new sym[k];				//создание динамического массива структур simbols
 	sym** psum = new sym * [k];				//создание динамического массива указателей на simbols
-	Statistics(String);						//вызов функции определения частоты символов в строке
+	Statistics(str);						//вызов функции определения частоты символов в строке
 	//если количество уникальных символов больше 2
 	if (k >= 2)
 	{
 		sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
 		makeCodes(root);						//вызов функции получения кода
-		CodeHuffman(String, BinaryCode, root);	//кодирование исходной строки по дереву
+		CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву
 
-		cout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
-		cout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
+		wcout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
+		wcout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
 		сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
-		cout << "Compression_ratio : \t" << сompression_ratio << "%\n";
+		wcout << "Compression_ratio : \t" << сompression_ratio << "%\n";
 
 		DecodeHuffman(BinaryCode, ReducedString, root);
 
 		errno_t Output = fopen_s(&stream, "Output.txt", "w");
-		fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
-
-		//char temp = 1001;
-		//fprintf(stream, "TEST Govna = %c", temp);
+		//уберем бинарный код из вывода
+		//fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
 		int count = 0;
-		fprintf(stream, "Encoding Code = ");
+		//fprintf(stream, "Encoding Code = ");
 		while (count < strlen(BinaryCode))
 		{
 			int temp = (BinaryCode[count++] - 48) * 10000000;
@@ -84,8 +106,16 @@ int main()
 			temp += (BinaryCode[count++] - 48);
 			fprintf(stream, "%c", temp);
 		}
-
-		fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
+		wifstream wif("Input.txt");
+		wofstream strm;                            // выходной поток-объект
+		strm.open("ReducedFile.txt");    // открываем
+		wchar_t temp_ch;
+		while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
+			strm.put(temp_ch);
+		strm.close();
+		wif.close();
 		fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
 	}
 	//если строка из одного уникального символа
@@ -212,10 +242,10 @@ void String::symbol_frequency()
     }
 }
 */
-void Statistics(char* String)
+void Statistics(wstring String)
 {
 	//посимвольно считываем строку и составляем таблицу встречаемости
-	for (int i = 0; i < strlen(String); i++)
+	for (int i = 0; i < String.size(); i++)
 	{
 		//цикл для подсчета информация из строки
 		chh = String[i];
@@ -271,14 +301,17 @@ void Statistics(char* String)
 	for (int i = 0; i < k; i++)
 	{
 		summ_of_all_freq += simbols[i].freq;
-		printf("Character = %d\tFrequancy = %f\tSymbol = %c\t\n", simbols[i].ch, simbols[i].freq, psym[i]->ch);
+		//printf("Character = %d\tFrequancy = %f\tSymbol = %c\t\n", simbols[i].ch, simbols[i].freq, psym[i]->ch);
+		//wprintf(L"Character = %с\tFrequancy = %f\t\n", simbols[i].ch, simbols[i].freq);
+		wcout << "Character = " << simbols[i].ch << "\tFrequancy = " << simbols[i].freq << endl;
 	}
-	printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", kk, summ_of_all_freq);
+	//printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", kk, summ_of_all_freq);
+	wcout << "\nKolovo simvolov : " << kk  << "\nSumm of all Frequancy : " << summ_of_all_freq << endl;
 }
 //функция кодирования строки
-void CodeHuffman(char* String, char* BinaryCode, sym* root)
+void CodeHuffman(wstring String, char* BinaryCode, sym* root)
 {
-	for (int i = 0; i < strlen(String); i++)
+	for (int i = 0; i < String.size(); i++)
 	{
 		chh = String[i];
 		for (int j = 0; j < k; j++)
@@ -295,7 +328,7 @@ void CodeHuffman(char* String, char* BinaryCode, sym* root)
 	}
 }
 //функция декодирования строки
-void DecodeHuffman(char* BinaryCode, char* ReducedString, sym* root)
+void DecodeHuffman(char* BinaryCode, wchar_t* ReducedString, sym* root)
 {
 	sym* Current;// указатель в дереве
 	char CurrentBit;// значение текущего бита кода
