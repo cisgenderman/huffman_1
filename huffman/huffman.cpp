@@ -38,6 +38,15 @@ float summ_of_all_freq = 0;	//сумма частот встречаемости
 float Size_Encode = 0;		//сумма в битах сжатой строки
 float сompression_ratio = 0;//коэффицент сжатия строки
 int _stateMenu;
+//чтение из файла
+std::wstring readFile(const char* filename)
+{
+	std::wifstream wif(filename);
+	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+	std::wstringstream wss;
+	wss << wif.rdbuf();
+	return wss.str();
+}
 
 int main()
 {
@@ -202,15 +211,6 @@ void Menu()
 		<< "(2) decompression" << endl
 		<< "enter: ";
 	wcin >> _stateMenu;
-}
-//чтение из файла
-std::wstring readFile(const char* filename)
-{
-	std::wifstream wif(filename);
-	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-	std::wstringstream wss;
-	wss << wif.rdbuf();
-	return wss.str();
 }
 //рeкурсивная функция создания дерева Хаффмана
 sym* makeTree(sym* psym[], int k)
