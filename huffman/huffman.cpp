@@ -141,7 +141,11 @@ int main()
 					wif.close();
 					Menu();
 					break;
-				}		
+				}
+			default:
+				wcout << "WRONG CHOISE" << endl;
+				Menu();
+				break;
 			}
 		}
 		//если строка из одного уникального символа
@@ -184,6 +188,10 @@ int main()
 				сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
 				wcout << "Compression ratio file = " << сompression_ratio << "%" << endl;
 				//fclose(stream);
+				Menu();
+				break;
+			default:
+				wcout << "WRONG CHOISE" << endl;
 				Menu();
 				break;
 			}
