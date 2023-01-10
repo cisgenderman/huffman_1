@@ -85,7 +85,7 @@ int main()
 		{
 			sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
 			makeCodes(root);						//вызов функции получения кода
-			CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву(создание бинарной строки)
+			//CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву(создание бинарной строки)
 			/////////////////
 			int count = 0;
 			errno_t Output;// = fopen_s(&stream, "Output.txt", "w");
@@ -93,7 +93,7 @@ int main()
 			switch (_stateMenu)
 			{
 			case 1:
-
+				CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву(создание бинарной строки)
 				wcout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
 				wcout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
 				сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
@@ -121,19 +121,27 @@ int main()
 				Menu();
 				break;
 			case 2:
-				DecodeHuffman(BinaryCode, ReducedString, root);
-				/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				//fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
-				wifstream wif("Input.txt");
-				wofstream strm;                            // выходной поток-объект
-				strm.open("DecodedFile.txt");    // открываем
-				wchar_t temp_ch;
-				while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
-					strm.put(temp_ch);
-				strm.close();
-				wif.close();
-				Menu();
-				break;
+				if (strlen(BinaryCode) == 0)
+				{
+					wcout << "COMPRESSION FILE DOSENT EXIST\n";
+					exit(-1);
+				}
+				else
+				{
+					DecodeHuffman(BinaryCode, ReducedString, root);
+					/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					//fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
+					wifstream wif("Input.txt");
+					wofstream strm;                            // выходной поток-объект
+					strm.open("DecodedFile.txt");    // открываем
+					wchar_t temp_ch;
+					while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
+						strm.put(temp_ch);
+					strm.close();
+					wif.close();
+					Menu();
+					break;
+				}		
 			}
 		}
 		//если строка из одного уникального символа
@@ -371,7 +379,7 @@ void Statistics(wstring String)
 	k = 0;					
 	kk = 0;
 	summ_of_all_freq = 0;
-	kolvo[256] = { 0 };	
+	//kolvo[256] = { 0 };	
 	memset(kolvo, 0, sizeof(int) * 256);
 	sym simbols_1[256] = { 0 };
 	
