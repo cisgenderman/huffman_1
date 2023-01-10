@@ -157,6 +157,8 @@ int main()
 			switch (_stateMenu)
 			{
 			case 1:
+				//т.к в входноой файл состоит из дного уник символа, то я просто каждые 8 байт заменяю 1 байтом
+				//по сути можно даже весь файл сжать до одного байта
 				Output = fopen_s(&stream, "Output.txt", "w");
 				count = kk / 8;
 				while (count > 0)
@@ -174,10 +176,13 @@ int main()
 				}
 				fprintf(stream, "%c", temp);
 				fclose(stream);
+				сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
+				wcout << "Compression ratio file = " << сompression_ratio << "%" << endl;
 				Menu();
 				break;
 			case 2:
 				//Output = fopen_s(&stream, "DecodedFile.txt", "w");
+				//тут я по сути никакого декодирования не делаю а просто переписываю входной файл в выходной
 				win.open("Input.txt");
 				wout.open("DecodedFile.txt");    // открываем
 				wchar_t temp_ch;
@@ -185,8 +190,6 @@ int main()
 					wout.put(temp_ch);
 				win.close();
 				wout.close();
-				сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
-				wcout << "Compression ratio file = " << сompression_ratio << "%" << endl;
 				Menu();
 				break;	
 			default:
