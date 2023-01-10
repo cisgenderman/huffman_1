@@ -8,8 +8,6 @@
 #include <io.h>
 #include <fcntl.h>
 
-
-
 using namespace std;
 
 struct sym
@@ -40,15 +38,6 @@ float summ_of_all_freq = 0;	//сумма частот встречаемости
 float Size_Encode = 0;		//сумма в битах сжатой строки
 float сompression_ratio = 0;//коэффицент сжатия строки
 int _stateMenu;
-
-std::wstring readFile(const char* filename)
-{
-	std::wifstream wif(filename);
-	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-	std::wstringstream wss;
-	wss << wif.rdbuf();
-	return wss.str();
-}
 
 int main()
 {
@@ -85,8 +74,7 @@ int main()
 		{
 			sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
 			makeCodes(root);						//вызов функции получения кода
-			//CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву(создание бинарной строки)
-			/////////////////
+
 			int count = 0;
 			errno_t Output;// = fopen_s(&stream, "Output.txt", "w");
 
@@ -123,27 +111,29 @@ int main()
 			case 2:
 				if (strlen(BinaryCode) == 0)
 				{
-					wcout << "COMPRESSION FILE DOSENT EXIST\n";
+					wcout << "\tCOMPRESSION FILE DOSENT EXIST\n";
 					exit(-1);
 				}
 				else
 				{
 					DecodeHuffman(BinaryCode, ReducedString, root);
-					/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					//fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
-					wifstream wif("Input.txt");
 					wofstream strm;                            // выходной поток-объект
 					strm.open("DecodedFile.txt");    // открываем
+					strm.imbue(std::locale(strm.getloc(), new std::codecvt_utf8<wchar_t>));	//устанавливаем кодировку
 					wchar_t temp_ch;
-					while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
+					wstring test = ReducedString;
+					for (int i = 0; i < test.size(); i++)
+					{
+						temp_ch = ReducedString[i];
 						strm.put(temp_ch);
+					}
 					strm.close();
-					wif.close();
 					Menu();
 					break;
 				}
 			default:
-				wcout << "WRONG CHOISE" << endl;
+				wcout << "\tWRONG CHOISE" << endl;
 				Menu();
 				break;
 			}
@@ -153,6 +143,8 @@ int main()
 		{
 			int count = 0, temp;
 			errno_t Output;
+			wifstream win;
+			wofstream wout;                           // выходной поток-объект
 			switch (_stateMenu)
 			{
 			case 1:
@@ -177,110 +169,24 @@ int main()
 				break;
 			case 2:
 				//Output = fopen_s(&stream, "DecodedFile.txt", "w");
-				wifstream wif("Input.txt");
-				wofstream strm;                            // выходной поток-объект
-				strm.open("DecodedFile.txt");    // открываем
+				win.open("Input.txt");
+				wout.open("DecodedFile.txt");    // открываем
 				wchar_t temp_ch;
-				while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
-					strm.put(temp_ch);
-				strm.close();
-				wif.close();
+				while (win.get(temp_ch))        // читать все символы, в том числе пробельные
+					wout.put(temp_ch);
+				win.close();
+				wout.close();
 				сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
 				wcout << "Compression ratio file = " << сompression_ratio << "%" << endl;
-				//fclose(stream);
 				Menu();
-				break;
+				break;	
 			default:
-				wcout << "WRONG CHOISE" << endl;
+				wcout << "\tWRONG CHOISE" << endl;
 				Menu();
 				break;
 			}
 		}
-		/*
-		Statistics(str);						//вызов функции определения частоты символов в строке
-	//если количество уникальных символов больше 2
-		if (k >= 2)
-		{
-			sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
-			makeCodes(root);						//вызов функции получения кода
-			CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву
-
-			wcout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
-			wcout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
-			сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
-			wcout << "Compression_ratio : \t" << сompression_ratio << "%\n";
-
-			DecodeHuffman(BinaryCode, ReducedString, root);
-
-			errno_t Output = fopen_s(&stream, "Output.txt", "w");
-			//уберем бинарный код из вывода
-			//fprintf(stream, "Binary Code:\n%s\n", BinaryCode);
-			int count = 0;
-			//fprintf(stream, "Encoding Code = ");
-			while (count < strlen(BinaryCode))
-			{
-				int temp = (BinaryCode[count++] - 48) * 10000000;
-				temp += (BinaryCode[count++] - 48) * 1000000;
-				temp += (BinaryCode[count++] - 48) * 100000;
-				temp += (BinaryCode[count++] - 48) * 10000;
-				temp += (BinaryCode[count++] - 48) * 1000;
-				temp += (BinaryCode[count++] - 48) * 100;
-				temp += (BinaryCode[count++] - 48) * 10;
-				temp += (BinaryCode[count++] - 48);
-				fprintf(stream, "%c", temp);
-			}
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//fprintf(stream, "\nDecoding string:\n%s\n", ReducedString);
-			wifstream wif("Input.txt");
-			wofstream strm;                            // выходной поток-объект
-			strm.open("ReducedFile.txt");    // открываем
-			wchar_t temp_ch;
-			while (wif.get(temp_ch))        // читать все символы, в том числе пробельные
-				strm.put(temp_ch);
-			strm.close();
-			wif.close();
-			fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
-		}
-		//если строка из одного уникального символа
-		else
-		{
-			errno_t Output = fopen_s(&stream, "Output.txt", "w");
-			fprintf(stream, "Binary Code:\n");
-			for (int i = 0; i < kk; i++)
-			{
-				fprintf(stream, "%d", 1);
-			}
-
-			fprintf(stream, "Encoding Code = ");
-			int count = kk / 8;
-			while (count > 0)
-			{
-				int temp = 11111111;
-				count--;
-				fprintf(stream, "%c", temp);
-			}
-			count = kk % 8;
-			int temp = 1;
-			while (count > 1)
-			{
-				temp = temp * 10 + 1;
-				count--;
-			}
-			fprintf(stream, "%c", temp);
-
-			fprintf(stream, "\nDecoding string:\n%s\n", String);
-			сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
-			fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
-		}
-		fclose(stream);
-		delete[] psum;
-		delete[] String;
-		delete[] BinaryCode;
-		delete[] ReducedString;
-		return 0;
-		*/
 	}
-	//fclose(stream);
 	delete[] psum;
 	delete[] String;
 	delete[] BinaryCode;
@@ -296,6 +202,15 @@ void Menu()
 		<< "(2) decompression" << endl
 		<< "enter: ";
 	wcin >> _stateMenu;
+}
+//чтение из файла
+std::wstring readFile(const char* filename)
+{
+	std::wifstream wif(filename);
+	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+	std::wstringstream wss;
+	wss << wif.rdbuf();
+	return wss.str();
 }
 //рeкурсивная функция создания дерева Хаффмана
 sym* makeTree(sym* psym[], int k)
@@ -328,7 +243,6 @@ sym* makeTree(sym* psym[], int k)
 	}
 	return makeTree(psym, k - 1);
 }
-
 //рекурсивная функция кодирования дерева
 //которая имитирует кодирование символов инпут файла 
 // по дереву, путем формирования символов 0 или 1(вместо битов)
@@ -349,7 +263,6 @@ void makeCodes(sym* root)
 		makeCodes(root->right);
 	}
 }
-
 //функция подсчета количества каждого символа и его вероятности в исходном файле
 /*
 //вычисение частоты символов в строке
