@@ -50,10 +50,13 @@ std::wstring readFile(const char* filename)
 
 int main()
 {
-	char* String = new char[1000000];
-	char* BinaryCode = new char[1000000];
-	//char* ReducedString = new char[1000000];
-	wchar_t* ReducedString = new wchar_t[1000000];
+	auto str = readFile("Input.txt");
+	_setmode(_fileno(stdout), _O_U16TEXT);
+	int str_size = str.size();
+	char* String = new char[str_size];
+	char* BinaryCode = new char[str_size*10];
+	//char* ReducedString = new char[str_size+1];
+	wchar_t* ReducedString = new wchar_t[str_size+1];
 	String[0] = BinaryCode[0] = ReducedString[0] = 0;
 	//schitivanie iz file
 	FILE* stream;
@@ -70,11 +73,9 @@ int main()
 	String[i - 1] = '\0';
 	fclose(stream);
 	*/
-	auto str = readFile("Input.txt");
-	_setmode(_fileno(stdout), _O_U16TEXT);
 	sym* symbols = new sym[k];				//создание динамического массива структур simbols
 	sym** psum = new sym * [k];				//создание динамического массива указателей на simbols
-	
+
 	Menu();
 	while (_stateMenu != 0)
 	{
@@ -191,7 +192,7 @@ int main()
 				win.close();
 				wout.close();
 				Menu();
-				break;	
+				break;
 			default:
 				wcout << "\tWRONG CHOISE" << endl;
 				Menu();
@@ -238,11 +239,11 @@ sym* makeTree(sym* psym[], int k)
 				for (int j = k - 1; j > i; j--)
 				{
 					psym[j] = psym[j - 1];
-				}	
+				}
 				psym[i] = temp;
 				break;
 			}
-		}	
+		}
 	}
 	return makeTree(psym, k - 1);
 }
@@ -271,42 +272,42 @@ void makeCodes(sym* root)
 //вычисение частоты символов в строке
 void String::symbol_frequency()
 {
-    char* temp_1 = new char[len];   //содержит символы
-    int* temp_2 = new int[len] {0}; //содержит частоту символа
-    //ищем элемент строки в массиве темп1 увеличивавем значение темп2 с индексом вхождения
-    //если не нашли добавляем элемент в темп1 и увеличиваем темп2
-    for (int i = 0; i < len; i++)
-    {
-        bool flag = false;
-        for (int j = 0; j < len; j++)
-        {
-            if (str[i] == temp_1[j])
-            {
-                temp_2[j]++;
-                flag = true;
-                break;
-            }
-        }
-        if (flag == false)
-        {
-            int k = 0;
-            while (temp_2[k] != 0)
-                k++;
-            temp_1[k] = str[i];
-            temp_2[k]++;
-        }
-    }
+	char* temp_1 = new char[len];   //содержит символы
+	int* temp_2 = new int[len] {0}; //содержит частоту символа
+	//ищем элемент строки в массиве темп1 увеличивавем значение темп2 с индексом вхождения
+	//если не нашли добавляем элемент в темп1 и увеличиваем темп2
+	for (int i = 0; i < len; i++)
+	{
+		bool flag = false;
+		for (int j = 0; j < len; j++)
+		{
+			if (str[i] == temp_1[j])
+			{
+				temp_2[j]++;
+				flag = true;
+				break;
+			}
+		}
+		if (flag == false)
+		{
+			int k = 0;
+			while (temp_2[k] != 0)
+				k++;
+			temp_1[k] = str[i];
+			temp_2[k]++;
+		}
+	}
 }
 */
 void Statistics(wstring String)
 {
-	k = 0;					
+	k = 0;
 	kk = 0;
 	summ_of_all_freq = 0;
 	//kolvo[256] = { 0 };	
 	memset(kolvo, 0, sizeof(int) * 256);
 	sym simbols_1[256] = { 0 };
-	
+
 	//посимвольно считываем строку и составляем таблицу встречаемости
 	for (int i = 0; i < String.size(); i++)
 	{
@@ -329,7 +330,7 @@ void Statistics(wstring String)
 			{
 				simbols_1[j].ch = chh;//(unsigned char)chh;
 				kolvo[j] = 1;
-				k++; 
+				k++;
 				kk++;
 				break;
 			}
@@ -339,7 +340,7 @@ void Statistics(wstring String)
 	for (int i = 0; i < k; i++)
 	{
 		simbols_1[i].freq = (float)kolvo[i] / kk;
-	}	
+	}
 	// в массив указателей заносим адреса записей
 	for (int i = 0; i < k; i++)
 	{
@@ -358,8 +359,8 @@ void Statistics(wstring String)
 				simbols_1[j + 1] = tempp;
 			}
 		}
-	}	
-	
+	}
+
 	//печатаем статистику 
 	//по итогу сумма частот должна дать 1
 	for (int i = 0; i < k; i++)
@@ -372,12 +373,13 @@ void Statistics(wstring String)
 		wcout << "Character = " << simbols[i].ch << "\tFrequancy = " << simbols[i].freq << endl;
 	}
 	//printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", kk, summ_of_all_freq);
-	wcout << "\nKolovo simvolov : " << kk  << "\nSumm of all Frequancy : " << summ_of_all_freq << endl;
+	wcout << "\nKolovo simvolov : " << kk << "\nSumm of all Frequancy : " << summ_of_all_freq << endl;
 }
 //функция кодирования строки
 void CodeHuffman(wstring String, char* BinaryCode, sym* root)
 {
-	char* BinCode = new char[1000000];
+	//char* BinCode = new char[1000000];
+	char* BinCode = new char[String.size()*10];
 	BinCode[0] = 0;
 	Size_Encode = 0;
 	for (int i = 0; i < String.size(); i++)
@@ -386,17 +388,24 @@ void CodeHuffman(wstring String, char* BinaryCode, sym* root)
 		for (int j = 0; j < k; j++)
 			if (chh == simbols[j].ch)
 			{
-				char temp[1000000];
-				*temp = *BinCode;
-				//strcat_s(BinaryCode, simbols[j].code);
+				/*
+				char temp[10000];
+				*temp = *BinCode;*/
+				/*
+				char* temp = new char[String.size() * 10];
+				temp = BinCode;*/
 				//записываем коды символов из дерева
-				strcat_s(BinCode, _countof(temp), simbols[j].code);
+				//strcat_s(BinCode, _countof(temp), simbols[j].code);
+				strcat(BinCode, simbols[j].code);
 				//считаем размер закодированной строки
-				Size_Encode = Size_Encode + (strlen(simbols[j].code)); //* kolvo[j]);
+				//Size_Encode = Size_Encode + (strlen(simbols[j].code)); //* kolvo[j]);
 			}
 	}
+	//считаем размер закодированной строки
+	Size_Encode = strlen(BinCode);
 	BinaryCode[0] = 0;
 	strcat(BinaryCode, BinCode);
+	delete[] BinCode;
 }
 //функция декодирования строки
 void DecodeHuffman(char* BinaryCode, wchar_t* ReducedString, sym* root)
