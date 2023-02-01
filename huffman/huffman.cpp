@@ -1,13 +1,14 @@
-﻿#include <iostream>
+﻿/*
+https://pandia.ru/text/77/275/21057-8.php
+*/
+#include <iostream>
 #include <errno.h>
 #include <locale>
 #include <fstream>
-
 #include <sstream>
 #include <codecvt>
 #include <io.h>
 #include <fcntl.h>
-
 using namespace std;
 
 struct sym
@@ -22,28 +23,27 @@ struct sym
 };
 
 void Menu();
-//void Statistics(char* String);
 void Statistics(wstring String);
-sym* makeTree(sym* psym[], int k);
-void makeCodes(sym* root);
+sym* MakeTree(sym* psym[], int couter_unique_simbols);
+void MakeCodes(sym* root);
 void CodeHuffman(wstring String, char* BinaryCode, sym* root);
 void DecodeHuffman(char* BinaryCode, wchar_t* ReducedString, sym* root);
-int chh;					//переменная для подсчета информация из строки
-int k = 0;					//счётчик количества различных букв, уникальных символов
-int kk = 0;					//счетчик количества всех знаков в файле
-int kolvo[256] = { 0 };		//инициализируем массив количества уникальных символов
-sym simbols[256] = { 0 };	//инициализируем массив записей
-sym* psym[256];				//инициализируем массив указателей на записи
-float summ_of_all_freq = 0;	//сумма частот встречаемости
-float Size_Encode = 0;		//сумма в битах сжатой строки
-float сompression_ratio = 0;//коэффицент сжатия строки
+int chh;								//переменная для подсчета информация из строки
+int couter_unique_simbols = 0;			//счётчик количества различных букв, уникальных символов
+int couter_of_all_simbols = 0;			//счетчик количества всех знаков в файле
+int arr_unique_simbols[256] = { 0 };	//инициализируем массив количества уникальных символов
+sym simbols[256] = { 0 };				//инициализируем массив записей
+sym* psym[256];							//инициализируем массив указателей на записи
+float summ_of_all_freq = 0;				//сумма частот встречаемости
+float Size_Encode = 0;					//сумма в битах сжатой строки
+float сompression_ratio = 0;			//коэффицент сжатия строки
 int _stateMenu;
 //чтение из файла
-std::wstring readFile(const char* filename)
+wstring readFile(const char* filename)
 {
-	std::wifstream wif(filename);
-	wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-	std::wstringstream wss;
+	wifstream wif(filename);
+	wif.imbue(locale(locale::empty(), new codecvt_utf8<wchar_t>));
+	wstringstream wss;
 	wss << wif.rdbuf();
 	return wss.str();
 }
@@ -73,17 +73,17 @@ int main()
 	String[i - 1] = '\0';
 	fclose(stream);
 	*/
-	sym* symbols = new sym[k];				//создание динамического массива структур simbols
-	sym** psum = new sym * [k];				//создание динамического массива указателей на simbols
+	sym* symbols = new sym[couter_unique_simbols];				//создание динамического массива структур simbols
+	sym** psum = new sym * [couter_unique_simbols];				//создание динамического массива указателей на simbols
 
 	Menu();
 	while (_stateMenu != 0)
 	{
 		Statistics(str);
-		if (k > 2)
+		if (couter_unique_simbols > 2)
 		{
-			sym* root = makeTree(psym, k);			//вызов функции создания дерева Хаффмана
-			makeCodes(root);						//вызов функции получения кода
+			sym* root = MakeTree(psym, couter_unique_simbols);			//вызов функции создания дерева Хаффмана
+			MakeCodes(root);						//вызов функции получения кода
 
 			int count = 0;
 			errno_t Output;// = fopen_s(&stream, "Output.txt", "w");
@@ -92,9 +92,9 @@ int main()
 			{
 			case 1:
 				CodeHuffman(str, BinaryCode, root);	//кодирование исходной строки по дереву(создание бинарной строки)
-				wcout << "Razmer ishodnogo file :\t" << kk * 8 << " bit\n";
+				wcout << "Razmer ishodnogo file :\t" << couter_of_all_simbols * 8 << " bit\n";
 				wcout << "Razmer Encode file : \t" << Size_Encode << " bit\n";
-				сompression_ratio = ((kk * 8 - Size_Encode) / (kk * 8)) * 100;
+				сompression_ratio = ((couter_of_all_simbols * 8 - Size_Encode) / (couter_of_all_simbols * 8)) * 100;
 				wcout << "Compression_ratio : \t" << сompression_ratio << "%\n";
 				//errno_t Output = fopen_s(&stream, "Output.txt", "w");
 				//уберем бинарный код из вывода
@@ -104,14 +104,13 @@ int main()
 				Output = fopen_s(&stream, "Output.txt", "w");
 				while (count < strlen(BinaryCode))
 				{
-					int temp = (BinaryCode[count++] - 48) * 10000000;
-					temp += (BinaryCode[count++] - 48) * 1000000;
-					temp += (BinaryCode[count++] - 48) * 100000;
-					temp += (BinaryCode[count++] - 48) * 10000;
-					temp += (BinaryCode[count++] - 48) * 1000;
-					temp += (BinaryCode[count++] - 48) * 100;
-					temp += (BinaryCode[count++] - 48) * 10;
-					temp += (BinaryCode[count++] - 48);
+					int bin_factor = 10000000;
+					int temp = (BinaryCode[count++] - 48) * bin_factor;
+					while (bin_factor > 1)
+					{
+						bin_factor /= 10;
+						temp += (BinaryCode[count++] - 48) * bin_factor;
+					}
 					fprintf(stream, "%c", temp);
 				}
 				//fprintf(stream, "Compression ratio file = %f%%\n", сompression_ratio);
@@ -161,14 +160,14 @@ int main()
 				//т.к в входноой файл состоит из дного уник символа, то я просто каждые 8 байт заменяю 1 байтом
 				//по сути можно даже весь файл сжать до одного байта
 				Output = fopen_s(&stream, "Output.txt", "w");
-				count = kk / 8;
+				count = couter_of_all_simbols / 8;
 				while (count > 0)
 				{
 					int temp = 11111111;
 					count--;
 					fprintf(stream, "%c", temp);
 				}
-				count = kk % 8;
+				count = couter_of_all_simbols % 8;
 				temp = 1;
 				while (count > 1)
 				{
@@ -177,7 +176,7 @@ int main()
 				}
 				fprintf(stream, "%c", temp);
 				fclose(stream);
-				сompression_ratio = (((float)kk * 8 - kk) / (kk * 8)) * 100;
+				сompression_ratio = (((float)couter_of_all_simbols * 8 - couter_of_all_simbols) / (couter_of_all_simbols * 8)) * 100;
 				wcout << "Compression ratio file = " << сompression_ratio << "%" << endl;
 				Menu();
 				break;
@@ -217,26 +216,26 @@ void Menu()
 	wcin >> _stateMenu;
 }
 //рeкурсивная функция создания дерева Хаффмана
-sym* makeTree(sym* psym[], int k)
+sym* MakeTree(sym* psym[], int couter_unique_simbols)
 {
 	sym* temp;
 	temp = new sym;
-	temp->freq = psym[k - 1]->freq + psym[k - 2]->freq;
+	temp->freq = psym[couter_unique_simbols - 1]->freq + psym[couter_unique_simbols - 2]->freq;
 	temp->code[0] = 0;
-	temp->left = psym[k - 1];
-	temp->right = psym[k - 2];
-	if (k == 2)
+	temp->left = psym[couter_unique_simbols - 1];
+	temp->right = psym[couter_unique_simbols - 2];
+	if (couter_unique_simbols == 2)
 	{
 		return temp;
 	}
 	else
 	{
 		//внесение в нужное место массива элемента дерева Хаффмана
-		for (int i = 0; i < k; i++)
+		for (int i = 0; i < couter_unique_simbols; i++)
 		{
 			if (temp->freq > psym[i]->freq)
 			{
-				for (int j = k - 1; j > i; j--)
+				for (int j = couter_unique_simbols - 1; j > i; j--)
 				{
 					psym[j] = psym[j - 1];
 				}
@@ -245,82 +244,49 @@ sym* makeTree(sym* psym[], int k)
 			}
 		}
 	}
-	return makeTree(psym, k - 1);
+	return MakeTree(psym, couter_unique_simbols - 1);
 }
 //рекурсивная функция кодирования дерева
 //которая имитирует кодирование символов инпут файла 
 // по дереву, путем формирования символов 0 или 1(вместо битов)
 // подсчитывая и возвращая их количество
 //влево от узла устанавливаем 0, вправо 1
-void makeCodes(sym* root)
+void MakeCodes(sym* root)
 {
 	if (root->left)
 	{
 		strcpy_s(root->left->code, root->code);
 		strcat_s(root->left->code, "0");
-		makeCodes(root->left);
+		MakeCodes(root->left);
 	}
 	if (root->right)
 	{
 		strcpy_s(root->right->code, root->code);
 		strcat_s(root->right->code, "1");
-		makeCodes(root->right);
+		MakeCodes(root->right);
 	}
 }
-//функция подсчета количества каждого символа и его вероятности в исходном файле
-/*
-//вычисение частоты символов в строке
-void String::symbol_frequency()
-{
-	char* temp_1 = new char[len];   //содержит символы
-	int* temp_2 = new int[len] {0}; //содержит частоту символа
-	//ищем элемент строки в массиве темп1 увеличивавем значение темп2 с индексом вхождения
-	//если не нашли добавляем элемент в темп1 и увеличиваем темп2
-	for (int i = 0; i < len; i++)
-	{
-		bool flag = false;
-		for (int j = 0; j < len; j++)
-		{
-			if (str[i] == temp_1[j])
-			{
-				temp_2[j]++;
-				flag = true;
-				break;
-			}
-		}
-		if (flag == false)
-		{
-			int k = 0;
-			while (temp_2[k] != 0)
-				k++;
-			temp_1[k] = str[i];
-			temp_2[k]++;
-		}
-	}
-}
-*/
 void Statistics(wstring String)
 {
-	k = 0;
-	kk = 0;
+	couter_unique_simbols = 0;
+	couter_of_all_simbols = 0;
 	summ_of_all_freq = 0;
-	//kolvo[256] = { 0 };	
-	memset(kolvo, 0, sizeof(int) * 256);
+	//arr_unique_simbols[256] = { 0 };	
+	memset(arr_unique_simbols, 0, sizeof(int) * 256);
 	sym simbols_1[256] = { 0 };
-
 	//посимвольно считываем строку и составляем таблицу встречаемости
 	for (int i = 0; i < String.size(); i++)
 	{
 		//цикл для подсчета информация из строки
 		chh = String[i];
-		for (int j = 0; j < 15000; j++)
+		for (int j = 0; j < 256; j++)
 		{
 			//если символ нашли в массиве записей символов, то в массиве количества уникальных символов увеличиваем количество
 			//и увеличиваем общее количество символов
 			if (chh == simbols_1[j].ch)
 			{
-				kolvo[j]++;
-				kk++;
+				arr_unique_simbols[j]++;
+				couter_of_all_simbols++;
 				break;
 			}
 			//если не нашли в массиве записей символов, то знаносим этот символ 
@@ -329,28 +295,28 @@ void Statistics(wstring String)
 			if (simbols_1[j].ch == 0)
 			{
 				simbols_1[j].ch = chh;//(unsigned char)chh;
-				kolvo[j] = 1;
-				k++;
-				kk++;
+				arr_unique_simbols[j] = 1;
+				couter_unique_simbols++;
+				couter_of_all_simbols++;
 				break;
 			}
 		}
 	}
 	// расчет частоты встречаемости
-	for (int i = 0; i < k; i++)
+	for (int i = 0; i < couter_unique_simbols; i++)
 	{
-		simbols_1[i].freq = (float)kolvo[i] / kk;
+		simbols_1[i].freq = (float)arr_unique_simbols[i] / couter_of_all_simbols;
 	}
 	// в массив указателей заносим адреса записей
-	for (int i = 0; i < k; i++)
+	for (int i = 0; i < couter_unique_simbols; i++)
 	{
 		psym[i] = &simbols_1[i];
 	}
 	//сортировка по убыванию
 	sym tempp;
-	for (int i = 1; i < k; i++)
+	for (int i = 1; i < couter_unique_simbols; i++)
 	{
-		for (int j = 0; j < k - 1; j++)
+		for (int j = 0; j < couter_unique_simbols - 1; j++)
 		{
 			if (simbols_1[j].freq < simbols_1[j + 1].freq)
 			{
@@ -360,10 +326,9 @@ void Statistics(wstring String)
 			}
 		}
 	}
-
 	//печатаем статистику 
 	//по итогу сумма частот должна дать 1
-	for (int i = 0; i < k; i++)
+	for (int i = 0; i < couter_unique_simbols; i++)
 	{
 		simbols[i] = simbols_1[i];
 		psym[i] = &simbols[i];
@@ -372,8 +337,8 @@ void Statistics(wstring String)
 		//wprintf(L"Character = %с\tFrequancy = %f\t\n", simbols[i].ch, simbols[i].freq);
 		wcout << "Character = " << simbols[i].ch << "\tFrequancy = " << simbols[i].freq << endl;
 	}
-	//printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", kk, summ_of_all_freq);
-	wcout << "\nKolovo simvolov : " << kk << "\nSumm of all Frequancy : " << summ_of_all_freq << endl;
+	//printf("\nKolovo simvolov : %d\nSumm of all Frequancy : %f\n", couter_of_all_simbols, summ_of_all_freq);
+	wcout << "\nKolovo simvolov : " << couter_of_all_simbols << "\nSumm of all Frequancy : " << summ_of_all_freq << endl;
 }
 //функция кодирования строки
 void CodeHuffman(wstring String, char* BinaryCode, sym* root)
@@ -385,20 +350,12 @@ void CodeHuffman(wstring String, char* BinaryCode, sym* root)
 	for (int i = 0; i < String.size(); i++)
 	{
 		chh = String[i];
-		for (int j = 0; j < k; j++)
+		for (int j = 0; j < couter_unique_simbols; j++)
 			if (chh == simbols[j].ch)
 			{
-				/*
-				char temp[10000];
-				*temp = *BinCode;*/
-				/*
-				char* temp = new char[String.size() * 10];
-				temp = BinCode;*/
 				//записываем коды символов из дерева
 				//strcat_s(BinCode, _countof(temp), simbols[j].code);
 				strcat(BinCode, simbols[j].code);
-				//считаем размер закодированной строки
-				//Size_Encode = Size_Encode + (strlen(simbols[j].code)); //* kolvo[j]);
 			}
 	}
 	//считаем размер закодированной строки
